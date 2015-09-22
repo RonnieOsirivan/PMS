@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/jquery-1.11.3.js"></script>
+<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/bootstrap.js"></script>
+<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/bootstrap-table.js"></script>
+<link rel="stylesheet" type="text/css" href="./bootstrap-3.3.5-dist/css/bootstrap.css"/>
+<link rel="stylesheet" type="text/css" href="./bootstrap-3.3.5-dist/css/bootstrap-table.css"/>
+<meta charset="UTF-8">
+<title>Employee Management</title>
+</head>
+<body>
+	<div id="toolbar" class="btn-group">
+		<form action="/IDR/logout" method="get" id="logoutForm">
+			<button id="logout" type="button" class="btn btn-default">
+	        	<i class="glyphicon glyphicon-off"></i>
+	    	</button>
+	    	<button id="request" type="button" class="btn btn-default">
+				<i class="glyphicon glyphicon-user"></i>
+			</button>
+			<button id="remove" type="button" class="btn btn-default" disabled>
+				<i class="glyphicon glyphicon-trash"></i>
+			</button>
+		</form>
+	</div>
+	<div class="container">
+		<table  id="table"
+				data-click-to-select="true"
+       			data-single-select="true"
+				data-toggle="table"
+				data-search="true"
+				data-show-columns="true"
+				data-pagination="true"
+				data-page-list="[5,10,20,25]"
+				data-toolbar="#toolbar"
+				data-cache="false"
+				data-url="./EmployeeManagementController">
+		    <thead>
+		    <tr>
+		    	<th data-field="state" data-checkbox="true"></th>
+		        <th data-field="employeeID" data-sortable="true">Employee ID</th>
+		        <th data-field="employeeFirstName" data-sortable="true">First Name</th>
+		        <th data-field="employeeLastName" data-sortable="true">Last Name</th>
+		        <th data-field="positionID" data-sortable="true">Position</th>
+		    </tr>
+		    </thead>
+		</table>
+	</div>
+	
+	<script type="text/javascript">
+		var table = $('#table');
+		//enable request button
+    	table.on('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table', function () {
+    		$('#remove').prop('disabled', !table.bootstrapTable('getSelections').length);
+        });
+	</script>
+</body>
+</html>
