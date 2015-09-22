@@ -4,64 +4,74 @@
 	<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/jquery-1.11.3.js"></script>
 	<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/bootstrap.js"></script>
 	<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/bootstrap-table.js"></script>
+	<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/sweetalert-dev.js"></script>
 	<link rel="stylesheet" type="text/css" href="./bootstrap-3.3.5-dist/css/bootstrap.css"/>
 	<link rel="stylesheet" type="text/css" href="./bootstrap-3.3.5-dist/css/bootstrap-table.css"/>
+	<link rel="stylesheet" type="text/css" href="./bootstrap-3.3.5-dist/css/sweetalert.css"/>
 <meta charset="UTF-8">
 <title>Parking Management</title>
 </head>
 	<body>
-		<form class="form-horizontal">
-		<fieldset>
-		<!-- Form Name -->
-		<legend>Parking management</legend>
-		
-		<!-- Text input-->
-		<div class="form-group">
-		  <label class="col-md-4 control-label" for="cusID">Customer ID</label>  
-		  <div class="col-md-4">
-		  <input id="cusID" name="cusID" type="number" placeholder="enter customer id" class="form-control input-md" required="">
-		    
-		  </div>
-		</div>
-		
-		<!-- Text input-->
-		<div class="form-group">
-		  <label class="col-md-4 control-label" for="parkingNum">Parking Number</label>  
-		  <div class="col-md-4">
-		  <input id="parkingNum" name="parkingNum" type="number" placeholder="enter parking number" class="form-control input-md" required="">
-		    
-		  </div>
-		</div>
-		
-		<!-- Multiple Radios -->
-		<div class="form-group">
-		  <label class="col-md-4 control-label" for="status">Status</label>
-		  <div class="col-md-4">
-		  <div class="radio">
-		    <label for="status-0">
-		      <input type="radio" name="status" id="status-0" value="in" checked="checked">
-		      IN
-		    </label>
+		<div class="form-horizontal">
+			<fieldset>
+			<!-- Form Name -->
+			<legend>Parking management</legend>
+			
+			<div class="form-group" id="divBillNum" style="display:none">
+			  <label class="col-md-4 control-label" for="cusID">Bill Number</label>  
+			  <div class="col-md-4">
+			  <input id="billNum" name="billNum" type="number" placeholder="enter bill number" class="form-control input-md" required="">
+			    
+			  </div>
 			</div>
-		  <div class="radio">
-		    <label for="status-1">
-		      <input type="radio" name="status" id="status-1" value="out">
-		      OUT
-		    </label>
+			
+			<!-- Text input-->
+			<div class="form-group" id="divCusID">
+			  <label class="col-md-4 control-label" for="cusID">Customer ID</label>  
+			  <div class="col-md-4">
+			  <input id="cusID" name="cusID" type="number" placeholder="enter customer id" class="form-control input-md" required="">
+			    
+			  </div>
 			</div>
-		  </div>
+			
+			<!-- Text input-->
+			<div class="form-group" id="divParkingNum">
+			  <label class="col-md-4 control-label" for="parkingNum">Parking Number</label>  
+			  <div class="col-md-4">
+			  <input id="parkingNum" name="parkingNum" type="number" placeholder="enter parking number" class="form-control input-md" required="" disabled="disabled">
+			    
+			  </div>
+			</div>
+			
+			<!-- Multiple Radios -->
+			<div class="form-group">
+			  <label class="col-md-4 control-label" for="status">Status</label>
+			  <div class="col-md-4">
+			  <div class="radio">
+			    <label for="status-0">
+			      <input type="radio" name="status" id="status-0" value="IN" checked="checked" onclick="onRadioBoxChange(this);">
+			      IN
+			    </label>
+				</div>
+			  <div class="radio">
+			    <label for="status-1">
+			      <input type="radio" name="status" id="status-1" value="OUT" onclick="onRadioBoxChange(this);">
+			      OUT
+			    </label>
+				</div>
+			  </div>
+			</div>
+			
+			<!-- Button -->
+			<div class="form-group">
+			  <label class="col-md-4 control-label" for="process"></label>
+			  <div class="col-md-4">
+			    <button id="process" name="process" class="btn btn-success" onclick="process()">Process</button>
+			  </div>
+			</div>
+			
+			</fieldset>
 		</div>
-		
-		<!-- Button -->
-		<div class="form-group">
-		  <label class="col-md-4 control-label" for="process"></label>
-		  <div class="col-md-4">
-		    <button id="process" name="process" class="btn btn-success">Process</button>
-		  </div>
-		</div>
-		
-		</fieldset>
-		</form>
 		
 		<div class="container">
 			<table  id="table"
@@ -86,13 +96,103 @@
 		</div>
 		
 		<script type="text/javascript">
+			var table = $("#table");
+			
+			table.on("click-row.bs.table",function(e,row){
+				var status = $('input[name="status"]:checked').val();
+				if(row.parkStatus === "Available"){
+					document.getElementById("parkingNum").value = row.parkNum;
+				}else if(status === "IN"){
+					sweetAlert("Parking is not available","Parking number "+row.parkNum +" not available","error");
+				}
+				
+			});
+			
 			function rowStyle(row,index){
-				console.log(row);
 				if(row.parkStatus === 'Not Available'){
 					return {classes : 'danger'};
 				}else{
 					return {};
 				}
+			}
+			
+			function process(){
+				var cusID = document.getElementById("cusID").value;
+				var billNum = document.getElementById("billNum").value;
+				var parkingNum = document.getElementById("parkingNum").value;
+				var status = $('input[name="status"]:checked').val();
+				if(status === "IN"){
+					if(!cusID){
+						swal("Please enter customer id","","error");
+					}else if(!parkingNum){
+						swal("Please select parking number","","error");
+					}else{
+						var xmlhttp = loadXMLDoc();
+						var json;
+						xmlhttp.open("GET","./ParkingManagementController?cusID="+cusID+"&parkingNum="+parkingNum+"&status="+status,true);
+						xmlhttp.send();
+						xmlhttp.onreadystatechange=function(){
+							if (xmlhttp.readyState==4 && xmlhttp.status==200){
+								//json = JSON.parse(xmlhttp.responseText);
+								swal({
+									title : "Success",
+									type : "success",
+									confirmButtonText : "ok"
+								},
+								function(){
+									table.bootstrapTable("refresh",{url:"./ParkingManagementController"});
+									document.getElementById("cusID").value = "";
+									document.getElementById("parkingNum").value="";
+								});
+							}
+						}
+					}
+				}else{//status === "OUT"
+					if(!billNum){
+						swal("Please enter bill number","","error");
+					}else{
+						var xmlhttp = loadXMLDoc();
+						var json;
+						xmlhttp.open("GET","./ParkingManagementController?billNum="+billNum+"&status="+status,true);
+						xmlhttp.send();
+						xmlhttp.onreadystatechange=function(){
+							if (xmlhttp.readyState==4 && xmlhttp.status==200){
+								//json = JSON.parse(xmlhttp.responseText);
+								swal({
+									title : "Success",
+									type : "success",
+									confirmButtonText : "ok"
+								},
+									function(){table.bootstrapTable("refresh",{url:"./ParkingManagementController"});
+									document.getElementById("billNum").value = "";
+								});
+							}
+					    }
+					}
+				}
+			}//end process
+			
+			function onRadioBoxChange(e){
+	        	if(e.value==="OUT"){
+	        		document.getElementById('divBillNum').style.display='block';
+	        		document.getElementById('divCusID').style.display='none';
+	        		document.getElementById('divParkingNum').style.display='none';
+	        	}else{
+	        		document.getElementById('divBillNum').style.display='none';
+	        		document.getElementById('divCusID').style.display='block';
+	        		document.getElementById('divParkingNum').style.display='block';
+	        	}
+	        }
+			
+			function loadXMLDoc(){
+		        var xmlhttp;
+		        if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
+					xmlhttp=new XMLHttpRequest();
+		        }
+		        else{// code for IE6, IE5
+		          	xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+		        }
+		        return xmlhttp;
 			}
 		</script>
 	</body>

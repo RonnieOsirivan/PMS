@@ -1,7 +1,10 @@
 package com.pms.controller;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -10,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.pms.model.Bill;
 import com.pms.model.Park;
 import com.pms.util.ConnectionDB;
 import com.pms.util.ConvertDataType;
@@ -35,7 +39,14 @@ public class ParkingManagementController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		getParkingInfo(request, response);
+		if("IN".equals(request.getParameter("status"))){
+			ProcessIn(request.getParameter("cusID"), request.getParameter("parkingNum"), request.getParameter("status"));
+		}else if("OUT".equals(request.getParameter("status"))){
+			processOut(request, response);
+		}else{
+			getParkingInfo(request, response);
+		}
+		
 	}
 
 	/**
@@ -58,5 +69,59 @@ public class ParkingManagementController extends HttpServlet {
 				"	order by status asc	";
 		return ConnectionDB.getInstance().getData(sql);
 	}
-
+	
+	private void ProcessIn(String cusID,String parkingNum,String status){
+		String sql = "	INSERT INTO `parking_management`.`bill` 	"+
+				"	(`parkingNumber`, `customerID`, `employeeID`, `status`) "+
+				"	VALUES (?, ?, '1', 'IN') ";
+		
+		String sql2 = "	update parking_management.park 	"+
+				"	set status = 'Not Available' 	"+
+				"	where parkingNumber= ?";
+		
+		Connection con = ConnectionDB.getInstance().getConnection();
+		try {
+			PreparedStatement stmt = con.prepareStatement(sql);
+			stmt.setInt(1,Integer.parseInt(parkingNum));
+			stmt.setInt(2, Integer.parseInt(cusID));
+			stmt.execute();
+			stmt.close();
+			
+			stmt = con.prepareStatement(sql2);
+			stmt.setInt(1, Integer.parseInt(parkingNum));
+			stmt.execute();
+			stmt.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void processOut(HttpServletRequest request, HttpServletResponse response){
+		ResultSetMapper<Bill> billMapper = new ResultSetMapper<Bill>();
+		Bill bill = billMapper.mapRersultSetToObject(getBillSQL(request.getParameter("billNum")), Bill.class).get(0);
+		updateToAvailable(bill.getParkingNum());
+	}
+	
+	private ResultSet getBillSQL(String billNum){
+		String sql = "	select * 	"+
+				"	from parking_management.bill	"+
+				"	where billNumber =  "+billNum;
+		return ConnectionDB.getInstance().getData(sql);
+	}
+	
+	private void updateToAvailable(int parkingNumber){
+		String sql = "	update parking_management.park 	"+
+				"	set status = 'Available' 	"+
+				"	where parkingNumber= ?";
+		Connection con = ConnectionDB.getInstance().getConnection();
+		try {
+			PreparedStatement stmt = con.prepareStatement(sql);
+			stmt.setInt(1, parkingNumber);
+			stmt.execute();
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 }

@@ -28,6 +28,10 @@ public class ConnectionDB {
 		return connectionDB;
 	}
 	
+	public Connection getConnection(){
+		return con;
+	}
+	
 	public ResultSet getData(String sql){
 		ResultSet result = null;
 		Statement statement;
