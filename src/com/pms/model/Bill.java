@@ -24,6 +24,14 @@ public class Bill {
 	private int hoursService;
 	@Column(name="status")
 	private String status;
+	@Column(name="costPerHour")
+	private Double costPerHour;
+	@Column(name="serviceCost")
+	private Double serviceCost;
+	@Column(name="customerName")
+	private String cusName;
+	@Column(name="employeeName")
+	private String empName;
 	
 	public int getBillNum() {
 		return billNum;
@@ -72,5 +80,29 @@ public class Bill {
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	public Double getCostPerHour() {
+		return costPerHour;
+	}
+	public void setCostPerHour(Double costPerHour) {
+		this.costPerHour = costPerHour;
+	}
+	public Double getServiceCost() {
+		return serviceCost;
+	}
+	public void setServiceCost(Double serviceCost) {
+		this.serviceCost = serviceCost;
+	}
+	public String getCusName() {
+		return cusName;
+	}
+	public void setCusName(String cusName) {
+		this.cusName = cusName;
+	}
+	public String getEmpName() {
+		return empName;
+	}
+	public void setEmpName(String empName) {
+		this.empName = empName;
 	}
 }

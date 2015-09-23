@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/d3.js"></script>
+<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/dimple.js"></script>
+<title>report member versus relate</title>
+<style type="text/css">
+	.header{
+		margin-left: auto;
+		margin-right: auto;
+	}
+	body {
+            text-align: center;
+            margin: 0;
+    }
+</style>
+</head>
+<body>
+	<div class="header">
+		<h1>Report member versus relate</h1>
+	</div>
+	<div id="chartContainer">
+	</div>
+	<script type="text/javascript">
+		d3.json("./ReportMemberVsRelateController",function(error,data){
+			console.log(data);
+			var svg = dimple.newSvg("#chartContainer", 1000, 500);
+			var myChart = new dimple.chart(svg, data);
+			myChart.setBounds(60, 50, 960, 300);
+			var x = myChart.addCategoryAxis("x", "mount");
+			myChart.addMeasureAxis("y", "sumCost");
+			myChart.addMeasureAxis("z", "sumCost");
+			
+			x.addOrderRule("mount");
+			
+			var lines = myChart.addSeries("cusTypeName", dimple.plot.line); 
+			lines.lineWeight = 3;
+			lines.lineMarkers = true;
+			
+			//lines.addEventHandler("click", onClick);
+			
+			myChart.addLegend(600, 20, 360, 20, "right");
+			myChart.draw(1000);
+		});
+	</script>
+</body>
+</html>

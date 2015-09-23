@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -99,14 +100,54 @@ public class ParkingManagementController extends HttpServlet {
 	
 	private void processOut(HttpServletRequest request, HttpServletResponse response){
 		ResultSetMapper<Bill> billMapper = new ResultSetMapper<Bill>();
-		Bill bill = billMapper.mapRersultSetToObject(getBillSQL(request.getParameter("billNum")), Bill.class).get(0);
-		updateToAvailable(bill.getParkingNum());
+		
+		ResultSet rs = getBillSQL(request.getParameter("billNum"));
+		try {
+			if(rs.next()){
+				Bill bill = billMapper.mapRersultSetToObject(getBillSQL(request.getParameter("billNum")), Bill.class).get(0);
+				updateToAvailable(bill.getParkingNum());
+				Date timeOut = new Date();
+				int serviceHours = (int) (timeOut.getTime() - bill.getTimeIn().getTime())/(1000*60*60);
+				double serviceCost;
+				if(serviceHours > 0){
+					serviceCost = serviceHours * bill.getCostPerHour();
+				}else{
+					serviceCost = bill.getCostPerHour();
+				}
+				
+				if("OUT".equals(bill.getStatus())){
+					SendResponse.getInstance().sendRessponseToView(request, response, "aleadySuccess");
+				}else{
+					updateBill(timeOut, serviceHours, request.getParameter("billNum"),serviceCost);
+					bill = billMapper.mapRersultSetToObject(getBillSQL(request.getParameter("billNum")), Bill.class).get(0);
+					String jsonResult = ConvertDataType.getInstance().objectToJasonArray(bill);
+					SendResponse.getInstance().sendRessponseToView(request, response, jsonResult);
+				}
+			}else{
+				SendResponse.getInstance().sendRessponseToView(request, response, "empty");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private ResultSet getBillSQL(String billNum){
-		String sql = "	select * 	"+
-				"	from parking_management.bill	"+
-				"	where billNumber =  "+billNum;
+		String sql = "	select b.billNumber,b.parkingNumber,	"+
+				"	b.customerID,b.employeeID,	"+
+				"	b.timeIn,b.timeOut,	"+
+				"	b.hoursService,	"+
+				"	b.status,b.serviceCost,	"+
+				"	concat(c.customerFirstName ,' ',c.customerLastName) as 'customerName',	"+
+				"	concat(emp.employeeFirstName,' ',emp.employeeLastName) as 'employeeName',	"+
+				"	ct.costPerHour	"+
+				"	from parking_management.bill b, 	"+
+				"	parking_management.customer c, 	"+
+				"	parking_management.customerType ct,	"+
+				"	parking_management.employee emp	"+
+				"	where b.customerID = c.customerID	"+
+				"	and b.employeeID = emp.employeeID	"+
+				"	and c.customerTypeID = ct.customerTypeID	"+
+				"	and b.billNumber = "+billNum;
 		return ConnectionDB.getInstance().getData(sql);
 	}
 	
@@ -118,6 +159,26 @@ public class ParkingManagementController extends HttpServlet {
 		try {
 			PreparedStatement stmt = con.prepareStatement(sql);
 			stmt.setInt(1, parkingNumber);
+			stmt.execute();
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void updateBill(Date timeOut, int serviceHours,String billNumber,double serviceCose){
+		String sql = "update parking_management.bill "+
+				"	set timeOut = ? , hoursService = ? , status = ? ,serviceCost = ?"+
+				"	where billNumber = ? ";
+		Connection con = ConnectionDB.getInstance().getConnection();
+		try {
+			java.sql.Timestamp sqlDate = new java.sql.Timestamp(timeOut.getTime());
+			PreparedStatement stmt = con.prepareStatement(sql);
+			stmt.setTimestamp(1, sqlDate);
+			stmt.setInt(2, serviceHours);
+			stmt.setString(3, "OUT");
+			stmt.setDouble(4, serviceCose);
+			stmt.setString(5, billNumber);
 			stmt.execute();
 			stmt.close();
 		} catch (SQLException e) {
