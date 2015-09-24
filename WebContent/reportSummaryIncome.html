@@ -7,7 +7,7 @@
 <script type="text/javascript" src="./bootstrap-3.3.5-dist/js/jquery-1.11.3.js"></script>
 <script type="text/javascript" src="./bootstrap-3.3.5-dist/js/bootstrap.js"></script>
 <link rel="stylesheet" type="text/css" href="./bootstrap-3.3.5-dist/css/bootstrap.css"/>
-<title>report member versus relate</title>
+<title>Report Summary Income</title>
 <style type="text/css">
 	body{
 		text-align: right;
@@ -15,9 +15,9 @@
 	}
 	.chart{
 		text-align: center;
-		margin: 20px;
+		font: 30px sans-serif;
 	}
-	.col-md-3{
+	.col-md-5{
 		text-align: right;
 	}
 </style>
@@ -34,7 +34,7 @@
 				Report <span class="caret"></span>
 			</button>
 			<ul class="dropdown-menu" role="menu">
-				<li><a href="./reportSummaryIncome.html">Summary Income</a></li>
+				<li><a href="./reportMemberVsRelate.html">Member vs Relate</a></li>
 				<li><a href="./reportSummaryIncome2.html">Summary Income2</a></li>
 			</ul>
 		</div>    
@@ -42,27 +42,42 @@
    	
 	<div id="chartContainer" class="chart">
 	</div>
+	
 	<script type="text/javascript">
-		d3.json("./ReportMemberVsRelateController",function(error,data){
-			console.log(data);
-			var svg = dimple.newSvg("#chartContainer", 1000, 500);
+		var svg = dimple.newSvg("#chartContainer", 590, 400);
+		d3.json("./ReportSummaryIncomeController",function(data){
 			var myChart = new dimple.chart(svg, data);
-			myChart.setBounds(60, 30, 900, 330)
-			var x = myChart.addCategoryAxis("x", "mount");
-			myChart.addMeasureAxis("y", "sumCost");
-			myChart.addMeasureAxis("z", "sumCost");
-			
-			x.addOrderRule("mount");
-			
-			var lines = myChart.addSeries("cusTypeName", dimple.plot.line); 
-			lines.lineWeight = 3;
-			lines.lineMarkers = true;
-			
-			//lines.addEventHandler("click", onClick);
-			
-			myChart.addLegend(600, 10, 360, 30, "right");
+			myChart.setBounds(60, 30, 510, 305)
+			var x = myChart.addCategoryAxis("x", "month");
+			x.addOrderRule("month");
+			myChart.addMeasureAxis("y", "summaryIncome");
+			var mySeries = myChart.addSeries(null, dimple.plot.bar);
+			mySeries.addEventHandler("click", onClick);
 			myChart.draw(1000);
 		});
+		
+		function onClick(e){
+			removeDiv("chartContainer2");
+			var header = d3.select("body").append("div").attr("id", "chartContainer2");
+			d3.select("#chartContainer2").attr("class","chart");
+			header.append("p").text("Summary income " + e.xValue);
+			var svg = dimple.newSvg("#chartContainer2", 590, 400);
+			d3.json("./ReportSummaryIncomeController?month="+e.xValue,function(data){
+				var myChart = new dimple.chart(svg, data);
+				myChart.setBounds(60, 30, 510, 330);
+				myChart.addCategoryAxis("x", "customerType");
+				myChart.addMeasureAxis("y", "summaryIncome");
+				myChart.addSeries("customerType", dimple.plot.bar);
+				myChart.addLegend(65, 10, 510, 20, "right");
+				myChart.draw(1000);
+			});
+		}
+		
+		function removeDiv(divName){
+        	if(document.getElementById(divName)!=null){
+        		document.getElementById(divName).remove();
+        	}
+        }
 		
 		function homeButton(){
 			window.location.assign("./parkingManagement.html")

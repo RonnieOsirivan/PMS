@@ -34,8 +34,8 @@
 				Report <span class="caret"></span>
 			</button>
 			<ul class="dropdown-menu" role="menu">
+				<li><a href="./reportMemberVsRelate.html">Member vs Relate</a></li>
 				<li><a href="./reportSummaryIncome.html">Summary Income</a></li>
-				<li><a href="./reportSummaryIncome2.html">Summary Income2</a></li>
 			</ul>
 		</div>    
    	</div>
@@ -54,7 +54,7 @@
 			
 			x.addOrderRule("mount");
 			
-			var lines = myChart.addSeries("cusTypeName", dimple.plot.line); 
+			var lines = myChart.addSeries("cusTypeName", dimple.plot.bar); 
 			lines.lineWeight = 3;
 			lines.lineMarkers = true;
 			

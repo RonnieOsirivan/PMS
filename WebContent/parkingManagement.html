@@ -12,9 +12,14 @@
 <title>Parking Management</title>
 <style type="text/css">
 	body{
-	    padding:30px;
+		margin: 20px;
 	}
 	
+	.col-md-8{
+		text-align: right;
+		font-size: 30px;
+	}
+
 </style>
 </head>
 	<body>
@@ -22,19 +27,22 @@
 			<fieldset>
 			<!-- Form Name -->
 			<div class="row">
-				<div class="col-md-10">
-					<legend> Parking management</legend>
+				<div class="col-md-8">
+					<label> Parking management</label>
 				</div>
-		    	<div class="col-md-2">
-		    		<div class="btn-group">
+		    	<div class="col-md-4" style="text-align: center;">
+			   		<div class="btn-group">
+			   			<button type="button" class="btn btn-primary" onclick="logOutButton()">logout</button>
 						<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-						Report <span class="caret"></span></button>
+							Report <span class="caret"></span>
+						</button>
 						<ul class="dropdown-menu" role="menu">
-							<li><a href="./reportMemberVsRelate.html">Report1</a></li>
-							<li><a href="#">Report2</a></li>
+							<li><a href="./reportMemberVsRelate.html">Member vs Relate</a></li>
+							<li><a href="./reportSummaryIncome.html">Summary Income</a></li>
+							<li><a href="./reportSummaryIncome2.html">Summary Income2</a></li>
 						</ul>
 					</div>    
-		    	</div>
+			   	</div>
 		  	</div>
 		  	
 			<div class="form-group" id="divBillNum" style="display:none">
@@ -240,6 +248,9 @@
 		          	xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
 		        }
 		        return xmlhttp;
+			}
+			function logOutButton(){
+				window.location.assign("./index.html")
 			}
 		</script>
 	</body>
