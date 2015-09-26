@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security" 
+	xmlns:beans="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+						http://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/security 
+						http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+			
+	<http pattern="/favicon/**" security="none" />
+	<http pattern="/font-face/**" security="none" />
+	<http pattern="/bootstrap-3.3.5-dist/**" security="none" />
+	<http pattern="/css/**" security="none" />
+	<http pattern="/js/**" security="none" />
+	<!--<http pattern="/login**" security="none" />-->
+	
+	<http use-expressions="true" create-session="always">
+			<intercept-url pattern="/parkingManagement.html" access="hasRole('user')" />
+			<intercept-url pattern="/employeeManagement.html" access="hasAnyRole('user','admin')" />
+	 		<access-denied-handler error-page="/403.html" />
+
+	 		<form-login login-page="/index.html"
+	 			default-target-url="/parkingManagement.html"
+	 			authentication-failure-url="/login.html?error='true'"
+	 			username-parameter="username" password-parameter="password"
+	 			always-use-default-target="true" />
+
+	 		<logout logout-success-url="/index.html"
+	 			invalidate-session="true" logout-url="/logout"/>
+	 		<remember-me />
+		<headers>
+			<cache-control />
+			<xss-protection/>
+		</headers>	
+		<session-management invalid-session-url="/index.html">
+			<concurrency-control max-sessions="1" error-if-maximum-exceeded="true"/>
+		</session-management>
+	</http>		
+	
+	<authentication-manager>
+		<authentication-provider >
+			<jdbc-user-service data-source-ref="dataSource"
+				users-by-username-query="select username as USERNAME , password as PASSWORD ,1 AS enabled from parking_management.user where username = ?"
+				authorities-by-username-query="select u.username as USERNAME, r.roleName as AUTHORITY
+												from parking_management.user u,
+												parking_management.role r
+												where u.roleID = r.roleID
+												and u.username = ?" />
+		</authentication-provider>
+	</authentication-manager>	
+</beans:beans>
