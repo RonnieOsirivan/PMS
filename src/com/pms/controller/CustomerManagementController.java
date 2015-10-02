@@ -39,12 +39,12 @@ public class CustomerManagementController extends HttpServlet {
 			deleteCustomer(request.getParameter("cusID"));
 		}else if("insert".equalsIgnoreCase(request.getParameter("method"))){
 			insertCustomer( request,  response);
-			response.sendRedirect("./customerManagement.html");
+			//SendResponse.getInstance().sendRessponseToView(request, response, "OK");
 		}else if("selectCustomer".equalsIgnoreCase(request.getParameter("method"))){
 			selectCustomer(request, response);
 		}else if("update".equalsIgnoreCase(request.getParameter("method"))){
 			updateCustomer(request, response);
-			response.sendRedirect("./customerManagement.html");
+			//response.sendRedirect("./customerManagement.html");
 		}else{
 			getCustomer(request, response);
 		}

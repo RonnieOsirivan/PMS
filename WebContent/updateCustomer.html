@@ -134,7 +134,7 @@
 	<div class="form-group">
 	  <label class="col-md-4 control-label" for="ok"></label>
 	  <div class="col-md-8">
-	    <button id="ok" name="method" class="btn btn-success" value="update">OK</button>
+	    <input type="button" id="ok" name="method" class="btn btn-success" value="ok">
 	    <input type="button" id="cancel" name="cancel" class="btn btn-danger" value="cancel">
 	  </div>
 	</div>
@@ -143,6 +143,79 @@
 	</form>
 	
 	<script type="text/javascript">
+	
+		$('#ok').click(function(){
+			//cusFirstName=Michel&cusLastName=Owen&phone=9856214444&gender=M&country=England&city=Liverpool&zipCode=23000&method=insert
+			var method = "insert";
+			var cusFirstName = $('#cusFirstName').val().trim();
+			var cusLastName = $('#cusLastName').val().trim();
+			var phone = $('#phone').val().trim();
+			var gender = $('input[name="gender"]:checked').val();
+			var country = $('#country').val().trim();
+			var city = $('#city').val().trim();
+			var zipCode = $('#zipCode').val().trim();
+			var cusID = $('#zipCode').val();
+			var addressID= $('#addressID').val();
+			var sex;
+			
+			if(gender==="M"){
+				sex = "Male";
+			}else{
+				sex = "Female";
+			}
+			
+			if(cusFirstName.length==0){
+				swal("Please enter first name", "", "error");
+			}else if(cusLastName.length==0){
+				swal("Please enter last name", "", "error");
+			}else if(phone.length==0){
+				swal("Please enter phone number", "", "error");
+			}else if(country.length==0){
+				swal("Please enter country name", "", "error");
+			}else if(city.length==0){
+				swal("Please enter city name", "", "error");
+			}else if(zipCode.length==0){
+				swal("Please enter zipcode", "", "error");
+			}else{
+				swal({title: "Confirm for update customer",
+					text: "First name :"+cusFirstName+"\n"+
+						"Last name :"+cusLastName+"\n"+
+						"Phone number :"+phone+"\n"+
+						"Gender :"+sex+"\n"+
+						"Country name :"+country+"\n"+
+						"City name :"+city+"\n"+
+						"Zipcode :"+zipCode+"\n",
+					type: "warning",
+					showCancelButton: true,
+					confirmButtonColor: "#DD6B55",
+					confirmButtonText: "Yes",
+					closeOnConfirm: false 
+					},
+					function(){
+						$.get("./CustomerManagementController",{
+							method : "update",
+							cusFirstName : cusFirstName,
+							cusLastName : cusLastName,
+							phone : phone,
+							gender : gender,
+							country : country,
+							city : city,
+							zipCode : zipCode,
+							cusID : cusID,
+							addressID : addressID
+						},function(data,status){
+							swal({type:"success",
+								title: "update customer success",
+								confirmButtonText: "ok"
+							},
+							function(){
+								window.location.assign("./customerManagement.html");
+							});
+						});
+					});
+			}//end else
+		});
+		
 		$('#cancel').click(function(){
 			swal({
 				title:"Are you sure to cancel?",
