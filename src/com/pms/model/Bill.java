@@ -32,6 +32,8 @@ public class Bill {
 	private String cusName;
 	@Column(name="employeeName")
 	private String empName;
+	@Column(name="carRegistration")
+	private String carRegis;
 	
 	public int getBillNum() {
 		return billNum;
@@ -104,5 +106,11 @@ public class Bill {
 	}
 	public void setEmpName(String empName) {
 		this.empName = empName;
+	}
+	public String getCarRegis() {
+		return carRegis;
+	}
+	public void setCarRegis(String carRegis) {
+		this.carRegis = carRegis;
 	}
 }

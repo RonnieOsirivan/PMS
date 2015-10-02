@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.List;
 
@@ -41,9 +42,11 @@ public class ParkingManagementController extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		if("IN".equals(request.getParameter("status"))){
-			ProcessIn(request.getParameter("cusID"), request.getParameter("parkingNum"), request.getParameter("status"));
+			ProcessIn(request,response);
 		}else if("OUT".equals(request.getParameter("status"))){
 			processOut(request, response);
+		}else if("getBill".equals(request.getParameter("status"))){
+			getAllBill(request, response);
 		}else{
 			getParkingInfo(request, response);
 		}
@@ -71,28 +74,36 @@ public class ParkingManagementController extends HttpServlet {
 		return ConnectionDB.getInstance().getData(sql);
 	}
 	
-	private void ProcessIn(String cusID,String parkingNum,String status){
-		String sql = "	INSERT INTO `parking_management`.`bill` 	"+
-				"	(`parkingNumber`, `customerID`, `employeeID`, `status`) "+
-				"	VALUES (?, ?, '1', 'IN') ";
-		
-		String sql2 = "	update parking_management.park 	"+
-				"	set status = 'Not Available' 	"+
-				"	where parkingNumber= ?";
-		
-		Connection con = ConnectionDB.getInstance().getConnection();
+	private void ProcessIn(HttpServletRequest request, HttpServletResponse response){
+		String checkCustomerSQL = "	select c.customerID	"+
+								"	from parking_management.customer c	"+
+								"	where c.customerID =	"+request.getParameter("cusID");
+		ResultSet rs = ConnectionDB.getInstance().getData(checkCustomerSQL);
 		try {
-			PreparedStatement stmt = con.prepareStatement(sql);
-			stmt.setInt(1,Integer.parseInt(parkingNum));
-			stmt.setInt(2, Integer.parseInt(cusID));
-			stmt.execute();
-			stmt.close();
-			
-			stmt = con.prepareStatement(sql2);
-			stmt.setInt(1, Integer.parseInt(parkingNum));
-			stmt.execute();
-			stmt.close();
-			
+			if(rs.next()){
+				String sql = "	INSERT INTO `parking_management`.`bill` 	"+
+						"	(`parkingNumber`, `customerID`, `employeeID`, `status`,`carRegistration`) "+
+						"	VALUES (?, ?, '1', 'IN',?) ";
+				
+				String sql2 = "	update parking_management.park 	"+
+						"	set status = 'Not Available' 	"+
+						"	where parkingNumber= ?";
+				Connection con = ConnectionDB.getInstance().getConnection();
+				PreparedStatement stmt = con.prepareStatement(sql);
+				stmt.setInt(1,Integer.parseInt(request.getParameter("parkingNum")));
+				stmt.setInt(2, Integer.parseInt(request.getParameter("cusID")));
+				stmt.setString(3, request.getParameter("carRegis"));
+				stmt.execute();
+				stmt.close();
+				
+				stmt = con.prepareStatement(sql2);
+				stmt.setInt(1, Integer.parseInt(request.getParameter("parkingNum")));
+				stmt.execute();
+				stmt.close();
+				SendResponse.getInstance().sendRessponseToView(request, response, "found");
+			}else{
+				SendResponse.getInstance().sendRessponseToView(request, response, "not found");
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -137,6 +148,7 @@ public class ParkingManagementController extends HttpServlet {
 				"	b.timeIn,b.timeOut,	"+
 				"	b.hoursService,	"+
 				"	b.status,b.serviceCost,	"+
+				"	b.carRegistration,	"+
 				"	concat(c.customerFirstName ,' ',c.customerLastName) as 'customerName',	"+
 				"	concat(emp.employeeFirstName,' ',emp.employeeLastName) as 'employeeName',	"+
 				"	ct.costPerHour	"+
@@ -184,5 +196,21 @@ public class ParkingManagementController extends HttpServlet {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private void getAllBill(HttpServletRequest request, HttpServletResponse response){
+		ResultSetMapper<Bill> billMapper = new ResultSetMapper<Bill>();
+		List<Bill> billList = billMapper.mapRersultSetToObject(getAllBillSQL(), Bill.class);
+		String resultJson = ConvertDataType.getInstance().objectToJasonArray(billList);
+		System.out.println(resultJson);
+		SendResponse.getInstance().sendRessponseToView(request, response, resultJson);
+	}
+	
+	private ResultSet getAllBillSQL(){
+		String sql = "	SELECT * 	"+
+				"	FROM parking_management.bill b	"+
+				"	where b.status like 'IN'	";
+		System.out.println(sql);
+		return ConnectionDB.getInstance().getData(sql);
 	}
 }

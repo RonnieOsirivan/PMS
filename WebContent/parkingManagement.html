@@ -30,8 +30,9 @@
 				<div class="col-md-8">
 					<label> Parking management</label>
 				</div>
-		    	<div class="col-md-4" style="text-align: center;">
+		    	<div class="col-md-4" style="text-align: right;">
 			   		<div class="btn-group">
+			   			<button type="button" class="btn btn-primary" onclick="customerButton()">Customer</button>
 			   			<button type="button" class="btn btn-primary" onclick="logOutButton()">logout</button>
 						<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
 							Report <span class="caret"></span>
@@ -67,7 +68,7 @@
 			<div class="form-group" id="divBillNum" style="display:none">
 			  <label class="col-md-4 control-label" for="cusID">Bill Number</label>  
 			  <div class="col-md-4">
-			  <input id="billNum" name="billNum" type="number" placeholder="enter bill number" class="form-control input-md" required="">
+			  <input id="billNum" name="billNum" type="number" placeholder="enter bill number" class="form-control input-md" required="" disabled="disabled">
 			    
 			  </div>
 			</div>
@@ -82,6 +83,15 @@
 			</div>
 			
 			<!-- Text input-->
+			<div class="form-group" id="divCarRegis">
+			  <label class="col-md-4 control-label" for="carRegis">Car registration</label>  
+			  <div class="col-md-4">
+			  <input id="carRegis" name="carRegis" type="text" placeholder="enter car registration" class="form-control input-md" required="">
+			    
+			  </div>
+			</div>
+			
+			<!-- Text input-->
 			<div class="form-group" id="divParkingNum">
 			  <label class="col-md-4 control-label" for="parkingNum">Parking Number</label>  
 			  <div class="col-md-4">
@@ -89,8 +99,6 @@
 			    
 			  </div>
 			</div>
-			
-			
 			
 			<!-- Button -->
 			<div class="form-group">
@@ -103,7 +111,7 @@
 			</fieldset>
 		</div>
 		
-		<div class="container">
+		<div class="container" id="divTable1">
 			<table  id="table"
 					data-click-to-select="true"
 	       			data-single-select="true"
@@ -111,22 +119,46 @@
 					data-search="true"
 					data-show-columns="true"
 					data-pagination="true"
-					data-page-list="[5,10,20,25]"
+					data-page-list="[5,10]"
 					data-toolbar="#toolbar"
 					data-cache="false"
 					data-row-style="rowStyle"
 					data-url="./ParkingManagementController">
 			    <thead>
 			    <tr>
-			        <th data-field="parkNum" data-sortable="true">Parking Number</th>
-			        <th data-field="parkStatus" data-sortable="true" data-order="asc">Parking Status</th>
+			        <th data-field="parkNum" data-sortable="true" data-order="desc">Parking Number</th>
+			        <th data-field="parkStatus" data-sortable="true" >Parking Status</th>
 			    </tr>
 			    </thead>
 			</table>
 		</div>
 		
+		<div class="container" id="divTable2" style="display: none;">
+			<table  id="table2"
+					data-click-to-select="true"
+	       			data-single-select="true"
+					data-toggle="table"
+					data-search="true"
+					data-show-columns="true"
+					data-pagination="true"
+					data-page-list="[5,10]"
+					data-toolbar="#toolbar"
+					data-cache="false"
+					data-row-style="rowStyle2">
+			    <thead>
+			    <tr>
+			        <th data-field="parkingNum" data-sortable="true">Parking Number</th>
+			        <th data-field="carRegis" data-sortable="true">Car Registration</th>
+			    </tr>
+			    </thead>
+			</table>
+		</div>
+		
+		
+		
 		<script type="text/javascript">
 			var table = $("#table");
+			var table2 = $('#table2'); 
 			
 			table.on("click-row.bs.table",function(e,row){
 				var status = $('input[name="status"]:checked').val();
@@ -138,6 +170,10 @@
 				
 			});
 			
+			table2.on("click-row.bs.table",function(e,row){
+				document.getElementById("billNum").value = row.billNum;
+			});
+			
 			function rowStyle(row,index){
 				if(row.parkStatus === 'Not Available'){
 					return {classes : 'danger'};
@@ -146,34 +182,51 @@
 				}
 			}
 			
+			function rowStyle2(row,index){
+				if(index%2 == 0){
+					return {classes : 'success'};
+				}else{
+					return {};
+				}
+			}
+			
 			function process(){
 				var cusID = document.getElementById("cusID").value;
+				var carRegis = document.getElementById("carRegis").value;
 				var billNum = document.getElementById("billNum").value;
 				var parkingNum = document.getElementById("parkingNum").value;
 				var status = $('input[name="status"]:checked').val();
 				if(status === "IN"){
 					if(!cusID){
 						swal("Please enter customer id","","error");
-					}else if(!parkingNum){
+					}else if(!carRegis){
+						swal("Please Enter number of car registration","","error");
+					}
+					else if(!parkingNum){
 						swal("Please select parking number","","error");
 					}else{
 						var xmlhttp = loadXMLDoc();
 						var json;
-						xmlhttp.open("GET","./ParkingManagementController?cusID="+cusID+"&parkingNum="+parkingNum+"&status="+status,true);
+						xmlhttp.open("GET","./ParkingManagementController?cusID="+cusID+"&parkingNum="+parkingNum+"&status="+status+"&carRegis="+carRegis,true);
 						xmlhttp.send();
 						xmlhttp.onreadystatechange=function(){
 							if (xmlhttp.readyState==4 && xmlhttp.status==200){
 								//json = JSON.parse(xmlhttp.responseText);
-								swal({
-									title : "Success",
-									type : "success",
-									confirmButtonText : "ok"
-								},
-								function(){
-									table.bootstrapTable("refresh",{url:"./ParkingManagementController"});
-									document.getElementById("cusID").value = "";
-									document.getElementById("parkingNum").value="";
-								});
+								if(xmlhttp.responseText === "not found"){
+									swal("Customer id not found","","error");
+								}else{
+									swal({
+										title : "Success",
+										type : "success",
+										confirmButtonText : "ok"
+									},
+									function(){
+										table.bootstrapTable("refresh",{url:"./ParkingManagementController"});
+										document.getElementById("cusID").value = "";
+										document.getElementById("carRegis").value="";
+										document.getElementById("parkingNum").value="";
+									});
+								}
 							}
 						}
 					}
@@ -198,7 +251,7 @@
 									});
 								}else if(xmlhttp.responseText === "aleadySuccess"){
 									swal({
-										title : "Bill number aleady success",
+										title : "Bill number already success",
 										type : "warning",
 										confirmButtonText : "ok"
 									},
@@ -210,7 +263,8 @@
 									console.log(json);
 									swal({
 										title : "Bill",
-										text : "Customer name :"+ json.cusName+"\n"+
+										text :"Car registration :"+json.carRegis+"\n"+ 
+											"Customer name :"+ json.cusName+"\n"+
 											" Staff service name :"+json.empName+"\n"+
 											" Parking number :"+json.parkingNum+"\n"+
 											" Time in :"+json.timeIn+"\n"+
@@ -219,7 +273,9 @@
 										type : "success",
 										confirmButtonText : "print"
 									},
-										function(){table.bootstrapTable("refresh",{url:"./ParkingManagementController"});
+									function(){
+										table2.bootstrapTable("refresh",{url:"./ParkingManagementController?status=getBill"});
+										table.bootstrapTable("refresh",{url:"./ParkingManagementController"});
 										document.getElementById("billNum").value = "";
 									});
 								}
@@ -231,12 +287,32 @@
 			
 			function onRadioBoxChange(e){
 	        	if(e.value==="OUT"){
+	        		var xmlhttp = loadXMLDoc();
+					var json;
+					xmlhttp.open("GET","./ParkingManagementController?status=getBill",true);
+					xmlhttp.send();
+					xmlhttp.onreadystatechange=function(){
+						if (xmlhttp.readyState==4 && xmlhttp.status==200){
+							json = JSON.parse(xmlhttp.responseText);
+							console.log(json);
+						}
+						table2.bootstrapTable('removeAll');
+						table2.bootstrapTable('load',json);
+				    }
+					
+					divTable2
+	        		document.getElementById('divTable1').style.display='none';
+					document.getElementById('divTable2').style.display='block';
 	        		document.getElementById('divBillNum').style.display='block';
 	        		document.getElementById('divCusID').style.display='none';
+	        		document.getElementById('divCarRegis').style.display='none';
 	        		document.getElementById('divParkingNum').style.display='none';
 	        	}else{
+	        		document.getElementById('divTable1').style.display='block';
+	        		document.getElementById('divTable2').style.display='none';
 	        		document.getElementById('divBillNum').style.display='none';
 	        		document.getElementById('divCusID').style.display='block';
+	        		document.getElementById('divCarRegis').style.display='block';
 	        		document.getElementById('divParkingNum').style.display='block';
 	        	}
 	        }
@@ -253,6 +329,10 @@
 			}
 			function logOutButton(){
 				window.location.assign("./index.html")
+			}
+			
+			function customerButton(){
+				window.location.assign("./customerManagement.html")
 			}
 		</script>
 	</body>

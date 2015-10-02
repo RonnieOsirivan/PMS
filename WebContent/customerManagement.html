@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/jquery-1.11.3.js"></script>
+	<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/bootstrap.js"></script>
+	<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/bootstrap-table.js"></script>
+	<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/sweetalert-dev.js"></script>
+	<link rel="stylesheet" type="text/css" href="./bootstrap-3.3.5-dist/css/bootstrap.css"/>
+	<link rel="stylesheet" type="text/css" href="./bootstrap-3.3.5-dist/css/bootstrap-table.css"/>
+	<link rel="stylesheet" type="text/css" href="./bootstrap-3.3.5-dist/css/sweetalert.css"/>
+<meta charset="UTF-8">
+<title>Customer Management</title>
+</head>
+<body>
+	<style type="text/css">
+		body{
+			margin: 20px;
+		}
+		
+		.col-md-8{
+			text-align: right;
+			font-size: 30px;
+		}
+	
+	</style>
+	
+	<div class="row">
+		<div class="col-md-8">
+			<label> Parking management</label>
+		</div>
+    	<div class="col-md-4" style="text-align: right;">
+	   		<div class="btn-group">
+	   			<button type="button" class="btn btn-primary" onclick="homeButton()">Home</button>
+	   			<button type="button" class="btn btn-primary" onclick="logOutButton()">logout</button>
+				<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+					Report <span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu" role="menu">
+					<li><a href="./reportMemberVsRelate.html">Member vs Relate</a></li>
+					<li><a href="./reportSummaryIncome.html">Summary Income</a></li>
+					<li><a href="./reportSummaryIncome2.html">Summary Income2</a></li>
+				</ul>
+			</div>    
+	   	</div>
+  	</div>
+  	
+	<div id="toolbar" class="btn-group">
+		<form action="/IDR/logout" method="get" id="logoutForm">
+	    	<button id="add" type="button" class="btn btn-default">
+				<i class="glyphicon glyphicon-plus"></i>
+			</button>
+			<button id="edit" type="button" class="btn btn-default" disabled>
+				<i class="glyphicon glyphicon-pencil"></i>
+			</button>
+			<button id="remove" type="button" class="btn btn-default" disabled>
+				<i class="glyphicon glyphicon-trash"></i>
+			</button>
+		</form>
+	</div>
+	<div class="container">
+		<table  id="table"
+				data-click-to-select="true"
+       			data-single-select="true"
+				data-toggle="table"
+				data-search="true"
+				data-show-columns="true"
+				data-pagination="true"
+				data-page-list="[5,10,20,25]"
+				data-toolbar="#toolbar"
+				data-cache="false"
+				data-row-style="rowStyle"
+				data-url="CustomerManagementController">
+		    <thead>
+		    <tr>
+		    	<th data-field="state" data-checkbox="true"></th>
+		        <th data-field="cusID" data-sortable="true">Customer ID</th>
+		        <th data-field="cusName" data-sortable="true">Customer Name</th>
+		        <th data-field="phone" data-sortable="true">Phone</th>
+		        <th data-field="address" data-sortable="true">Address</th>
+		    </tr>
+		    </thead>
+		</table>
+	</div>
+	
+	<script type="text/javascript">
+		var table = $('#table');
+		//enable request button
+    	table.on('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table', function () {
+    		$('#edit').prop('disabled', !table.bootstrapTable('getSelections').length);
+    		$('#remove').prop('disabled', !table.bootstrapTable('getSelections').length);
+        });
+		
+		$('#add').click(function(){
+			window.location.assign("./addCustomer.html");
+		});
+ 
+		$('#edit').click(function(){
+			var check = table.bootstrapTable('getSelections');
+			console.log(check);
+			sessionStorage.setItem("cusID", check[0].cusID)
+			window.location.assign("./updateCustomer.html");
+		});
+		
+		function rowStyle(row,index){
+			if(index%2 == 0){
+				return {classes : 'success'};
+			}else{
+				return {};
+			}
+		}
+		
+    	$('#remove').click(function () {
+	  		swal({title: "Are you sure?",
+			text: "You will not be able to recover this file!",
+			type: "warning",   showCancelButton: true,   confirmButtonColor: "#DD6B55",
+			confirmButtonText: "Yes, delete !",
+			closeOnConfirm: false 
+			},
+			function(){
+				var param = "";
+				var check = table.bootstrapTable('getSelections');
+				check.forEach(function(element){
+					param = element.cusID;
+				});
+				
+				$.get("./CustomerManagementController",{
+					method : "delete",
+					cusID : param
+				},function(data,status){
+					//swal("Deleted!", "Your imaginary file has been deleted.","success");
+					swal({type:"success",
+						title: "Deleted!",
+						confirmButtonText: "ok"
+					},
+					function(){
+						table.bootstrapTable('removeAll');
+						//$table.bootstrapTable('load', {silent:true});
+						table.bootstrapTable('refresh', {url: "./CustomerManagementController"});
+						$('#remove').prop('disabled',true);
+					});
+				});
+			});
+		});
+    	
+    	function homeButton(){
+			window.location.assign("./parkingManagement.html")
+		}
+		
+		function logOutButton(){
+			window.location.assign("./index.html")
+		}
+	</script>
+</body>
+</html>

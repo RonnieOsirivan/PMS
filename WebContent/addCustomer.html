@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/jquery-1.11.3.js"></script>
+<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/bootstrap.js"></script>
+<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/bootstrap-table.js"></script>
+<script type="text/javascript" src="./bootstrap-3.3.5-dist/js/sweetalert-dev.js"></script>
+<link rel="stylesheet" type="text/css" href="./bootstrap-3.3.5-dist/css/bootstrap.css"/>
+<link rel="stylesheet" type="text/css" href="./bootstrap-3.3.5-dist/css/bootstrap-table.css"/>
+<link rel="stylesheet" type="text/css" href="./bootstrap-3.3.5-dist/css/sweetalert.css"/>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<style>
+	form{
+		margin-left:150px;
+		margin-right:150px;
+		margin-top:50px;
+		border-style: outset;
+	}
+	body{
+			margin: 20px;
+		}
+		
+	.col-md-8{
+		font-size: 30px;
+	}
+</style>
+
+	<div class="row">
+		<div class="col-md-8" style="text-align: right;">
+			<label> Parking management</label>
+		</div>
+    	<div class="col-md-4" style="text-align: right;">
+	   		<div class="btn-group">
+	   			<button type="button" class="btn btn-primary" onclick="homeButton()">Home</button>
+	   			<button type="button" class="btn btn-primary" onclick="logOutButton()">logout</button>
+				<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+					Report <span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu" role="menu">
+					<li><a href="./reportMemberVsRelate.html">Member vs Relate</a></li>
+					<li><a href="./reportSummaryIncome.html">Summary Income</a></li>
+					<li><a href="./reportSummaryIncome2.html">Summary Income2</a></li>
+				</ul>
+			</div>    
+	   	</div>
+  	</div>
+	<form class="form-horizontal" action="./CustomerManagementController" method="get">
+	<fieldset>
+	
+	<!-- Form Name -->
+	<legend>Add Customer</legend>
+	
+	<!-- Text input-->
+	<div class="form-group">
+	  <label class="col-md-4 control-label" for="cusFirstName">First name</label>  
+	  <div class="col-md-5">
+	  <input id="cusFirstName" name="cusFirstName" type="text" placeholder="Enter first name" class="form-control input-md" required="">
+	    
+	  </div>
+	</div>
+	
+	<!-- Text input-->
+	<div class="form-group">
+	  <label class="col-md-4 control-label" for="cusLastName">Last name</label>  
+	  <div class="col-md-5">
+	  <input id="cusLastName" name="cusLastName" type="text" placeholder="Enter last name" class="form-control input-md" required="">
+	    
+	  </div>
+	</div>
+	
+	<!-- Text input-->
+	<div class="form-group">
+	  <label class="col-md-4 control-label" for="phone">Phone</label>  
+	  <div class="col-md-4">
+	  <input id="phone" name="phone" type="number" placeholder="Enter phone" class="form-control input-md" required="" oninput="phoneVal(this)">
+	    
+	  </div>
+	</div>
+	
+	<!-- Multiple Radios -->
+	<div class="form-group">
+	  <label class="col-md-4 control-label" for="gender">Gender</label>
+	  <div class="col-md-4">
+	  <div class="radio">
+	    <label for="gender-0">
+	      <input type="radio" name="gender" id="gender-0" value="M" checked="checked">
+	      Male
+	    </label>
+		</div>
+	  <div class="radio">
+	    <label for="gender-1">
+	      <input type="radio" name="gender" id="gender-1" value="F">
+	      Female
+	    </label>
+		</div>
+	  </div>
+	</div>
+	
+	<!-- Text input-->
+	<div class="form-group">
+	  <label class="col-md-4 control-label" for="country">Country</label>  
+	  <div class="col-md-4">
+	  <input id="country" name="country" type="text" placeholder="Enter country" class="form-control input-md" required="">
+	    
+	  </div>
+	</div>
+	
+	<!-- Text input-->
+	<div class="form-group">
+	  <label class="col-md-4 control-label" for="city">City</label>  
+	  <div class="col-md-4">
+	  <input id="city" name="city" type="text" placeholder="Enter city" class="form-control input-md" required="">
+	    
+	  </div>
+	</div>
+	
+	<!-- Text input-->
+	<div class="form-group">
+	  <label class="col-md-4 control-label" for="zipCode">Zip code</label>  
+	  <div class="col-md-4">
+	  <input id="zipCode" name="zipCode" type="text" placeholder="Enter zip code" class="form-control input-md" required="" oninput="zipcodeVal(this)">
+	    
+	  </div>
+	</div>
+	
+	<!-- Button (Double) -->
+	<div class="form-group">
+	  <label class="col-md-4 control-label" for="ok"></label>
+	  <div class="col-md-8">
+	    <button id="ok" name="method" class="btn btn-success" value="insert">OK</button>
+	    <input type="button" id="cancel" name="cancel" class="btn btn-danger" value="cancel">
+	  </div>
+	</div>
+	
+	</fieldset>
+	</form>
+<script type="text/javascript">
+	$('#cancel').click(function(){
+		swal({
+			title:"Are you sure to cancel?",
+			type: "warning",
+			showCancelButton: true,
+			confirmButtonColor: "#DD6B55",
+			confirmButtonText: "Yes!",
+			closeOnConfirm: false
+		},function(){
+			window.location.assign("./customerManagement.html");
+		});
+	});
+	
+	function phoneVal(obj){
+		if(obj.value.length > 10){
+			obj.value = obj.value.slice(0, 10);
+		}
+	}
+	
+	function zipcodeVal(obj){
+		if(obj.value.length > 5){
+			obj.value = obj.value.slice(0, 5);
+		}
+	}
+	
+	function homeButton(){
+		window.location.assign("./parkingManagement.html")
+	}
+	
+	function logOutButton(){
+		window.location.assign("./index.html")
+	}
+</script>
+	
+</body>
+</html>
