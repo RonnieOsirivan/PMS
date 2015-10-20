@@ -34,7 +34,6 @@ public class CustomerManagementController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		System.out.println(request.getParameter("method"));
 		if("delete".equalsIgnoreCase(request.getParameter("method"))){
 			deleteCustomer(request.getParameter("cusID"));
 		}else if("insert".equalsIgnoreCase(request.getParameter("method"))){
@@ -71,7 +70,6 @@ public class CustomerManagementController extends HttpServlet {
 				"	FROM parking_management.customer cus,	"+
 				"	parking_management.address address	"+
 				"	where cus.addressID = address.addressID ";
-		System.out.println(sql);
 		return ConnectionDB.getInstance().getData(sql);
 	}
 	
@@ -140,7 +138,6 @@ public class CustomerManagementController extends HttpServlet {
 		ResultSetMapper<Customer> cusMapper = new ResultSetMapper<Customer>();
 		Customer cus = cusMapper.mapRersultSetToObject(selectCustomerSQL(request.getParameter("cusID")), Customer.class).get(0);
 		String resultJson = ConvertDataType.getInstance().objectToJasonArray(cus);
-		System.out.println(resultJson);
 		SendResponse.getInstance().sendRessponseToView(request, response, resultJson);
 	}
 	
